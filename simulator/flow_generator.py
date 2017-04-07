@@ -5,30 +5,40 @@ Created on Sat Apr 01 16:22:25 2017
 @author: Jincheng
 """
 
-from flow_lib import plot_density
 from flow_lib import generate_data
-import selectivesearch
-import matplotlib.pyplot as plt
 import matplotlib
-import pandas as pd
 import numpy as np
 import json
 import os
+import h5py
+import argparse
 
-n = 10000
-
+n = 10
 datapath = "../data/"
+
+## Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-o", "--output")
+parser.add_argument("-n", "--number", type=int)
+args = parser.parse_args()
+
+if args.output:
+    datapath = args.output
+if args.number:
+    n = int(args.number)
 
 if not os.path.exists(datapath):
     os.mkdir(datapath)
     
-data = np.empty(shape=(1,128,128,3))
+
 annotation = []
+
+f = h5py.File(os.path.join(datapath, "sim_data.hdf5"), "w")
 
 progress = 0.
 for i in range(n):
     if float(i+1)/n >= progress:
-        print("Complete " + str(progress * 100) + "%")
+        print("Complete " + str(float(i+1)/n * 100) + "%")
         progress += 0.05
     temp = generate_data()
     img = temp['image']
@@ -36,20 +46,20 @@ for i in range(n):
     normed_data = (img - np.min(img)) / (np.max(img) - np.min(img))
     mapped_data = color_map(normed_data)
     temp_img = mapped_data[:,:,:3]
-    temp_img = temp_img.reshape((1,128,128,3))
-    data = np.append(data, temp_img, axis=0)
+    name = "img" + str(i)
+    dset = f.create_dataset(name, data=temp_img)
     temp.pop('image')
+    temp["name"] = name
     for key in temp:
-        temp[key] = temp[key].tolist()
+        if type(temp[key]) is np.ndarray:
+            temp[key] = temp[key].tolist()
     annotation.append(temp)
 
-data=data[1:]
+print('Saving annotation data to ' + datapath)
 
-print('Saving simulation data to ' + datapath)
-
-np.save(datapath + "sample.npy", data)
-with open(datapath + 'annotation.js', 'w') as fp:
+with open(os.path.join(datapath, 'annotation.js'), 'w') as fp:
     json.dump(annotation, fp)
+f.close()
 #img_lbl, regions = selectivesearch.selective_search(data, scale=500, sigma=.9, min_size=20)
 #bb = [x['rect'] for x in regions if x['size'] > 20 
 #      and x['rect'][2] / x['rect'][3] < 5 

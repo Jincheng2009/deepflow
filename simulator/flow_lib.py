@@ -48,6 +48,15 @@ def generate_data():
     pop_idx = np.random.choice(range(4), size=npop)
     exists = np.array([False] * 4)
     exists[pop_idx] = True
+    pattern = np.zeros((2,2))
+    if exists[0]:
+        pattern[1,0] = 1
+    if exists[1]:
+        pattern[0,0] = 1
+    if exists[2]:
+        pattern[1,1] = 1
+    if exists[3]:
+        pattern[0,1] = 1        
 
     ## Correlation between x and y for four population
     correlation = np.random.normal(0, scale = 0.1, size=4)
@@ -69,6 +78,7 @@ def generate_data():
     bb = pd.DataFrame(columns=["x","y","w","h"])
     for i in range(4):
         if not exists[i]:
+            counts[i] = 0
             continue
         count = counts[i]
         mean = centers[i]
@@ -101,7 +111,7 @@ def generate_data():
             bb1 = bb[i,:]
             bb2 = bb[j,:]
             overlap[i,j] = area(intersection(bb1,bb2)) / np.min([area(bb1),area(bb2)])
-    result = {"image": img, "bb": bb, "count":counts[pop_idx], "overlap":overlap}
+    result = {"image": img, "bb": bb, "count":counts, "overlap":overlap, "pattern": pattern}
     return result
     
 # draw rectangles on the original image
