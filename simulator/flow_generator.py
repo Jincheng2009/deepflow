@@ -13,13 +13,23 @@ import matplotlib
 import pandas as pd
 import numpy as np
 import json
+import os
 
-n= 10 
+n = 10000
 
 datapath = "../data/"
+
+if not os.path.exists(datapath):
+    os.mkdir(datapath)
+    
 data = np.empty(shape=(1,128,128,3))
 annotation = []
+
+progress = 0.
 for i in range(n):
+    if float(i+1)/n >= progress:
+        print("Complete " + str(progress * 100) + "%")
+        progress += 0.05
     temp = generate_data()
     img = temp['image']
     color_map = matplotlib.cm.get_cmap('hsv')
@@ -34,6 +44,8 @@ for i in range(n):
     annotation.append(temp)
 
 data=data[1:]
+
+print('Saving simulation data to ' + datapath)
 
 np.save(datapath + "sample.npy", data)
 with open(datapath + 'annotation.js', 'w') as fp:
