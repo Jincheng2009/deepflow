@@ -45,7 +45,7 @@ def generate_data():
 
     ## Number of populations
     npop = np.random.choice(range(1,5))
-    pop_idx = np.random.choice(range(4), size=npop)
+    pop_idx = np.random.choice(range(4), size=npop, replace=False)
     exists = np.array([False] * 4)
     exists[pop_idx] = True
     pattern = np.zeros((2,2))
@@ -137,8 +137,8 @@ def intersection(a,b):
     return (x, y, w, h)
 
 def union(a,b):
-  x = min(a[0], b[0])
-  y = min(a[1], b[1])
-  w = max(a[0]+a[2], b[0]+b[2]) - x
-  h = max(a[1]+a[3], b[1]+b[3]) - y
-  return (x, y, w, h)
+    x = min(a[0], b[0])
+    y = min(a[1], b[1])
+    w = max(a[0]+a[2], b[0]+b[2]) - x
+    h = max(a[1]+a[3], b[1]+b[3]) - y
+    return (x, y, w, h)
